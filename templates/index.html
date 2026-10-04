@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Office Syndrome Predictor</title>
+    <!-- นำเข้าฟอนต์ Kanit จาก Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            margin: 0;
+            padding: 0;
+            /* พื้นหลังไล่สีโทนเหลือง-ส้ม ดูอบอุ่นน่าใช้ */
+            background: linear-gradient(135deg, #FFF9C4 0%, #FFCC80 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #4A4A4A;
+        }
+
+        .container {
+            background-color: #FFFFFF;
+            width: 100%;
+            max-width: 650px;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            margin: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #F57C00;
+            margin: 0 0 10px 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header p {
+            color: #757575;
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ฟิลด์นี้ให้กินพื้นที่เต็ม 2 คอลัมน์ */
+        .full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #5D4037;
+        }
+
+        input, select {
+            padding: 12px 16px;
+            border: 2px solid #FFE082;
+            border-radius: 12px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 15px;
+            background-color: #FAFAFA;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: #FFA000;
+            background-color: #FFF;
+            box-shadow: 0 0 0 4px rgba(255, 160, 0, 0.1);
+        }
+
+        button {
+            grid-column: span 2;
+            background: linear-gradient(135deg, #FFB300 0%, #FF8F00 100%);
+            color: white;
+            font-family: 'Kanit', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 143, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result-box {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #FFF3E0;
+            border: 2px dashed #FFB300;
+            border-radius: 16px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .result-box h2 {
+            margin: 0;
+            color: #E65100;
+            font-size: 22px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* รองรับหน้าจอมือถือ */
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .full-width {
+                grid-column: span 1;
+            }
+            button {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>🌻 เช็คความเสี่ยงออฟฟิศซินโดรม</h1>
+            <p>วิเคราะห์สุขภาพของคุณง่ายๆ ด้วย AI อัจฉริยะ</p>
+        </div>
+
+        <form action="/predict" method="post">
+            <div class="form-grid">
+                
+                <div class="input-group">
+                    <label>💻 ชั่วโมงทำงานหน้าจอ (ต่อวัน)</label>
+                    <input type="number" step="0.1" name="daily_work_hours" placeholder="เช่น 8 หรือ 8.5" required>
+                </div>
+
+                <div class="input-group">
+                    <label>☕ ความถี่ในการพัก (ต่อชั่วโมง)</label>
+                    <input type="number" step="0.1" name="break_frequency_hr" placeholder="เช่น 0.5 (พักทุก 2 ชม.)" required>
+                </div>
+
+                <div class="input-group">
+                    <label>🪑 ใช้เก้าอี้เพื่อสุขภาพ (Ergonomic)?</label>
+                    <select name="ergonomic_chair" required>
+                        <option value="" disabled selected>-- เลือก --</option>
+                        <option value="1">ใช้</option>
+                        <option value="0">ไม่ใช้ (เก้าอี้ธรรมดา)</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>🏃‍♀️ ออกกำลังกาย (วัน/สัปดาห์)</label>
+                    <input type="number" name="exercise_days_per_wk" min="0" max="7" placeholder="0 - 7" required>
+                </div>
+
+                <div class="input-group full-width">
+                    <label>🧘‍♂️ ประเมินท่านั่งทำงาน (1 แย่มาก - 5 หลังตรง)</label>
+                    <select name="posture_score" required>
+                        <option value="" disabled selected>-- ให้คะแนนท่านั่งตัวเอง --</option>
+                        <option value="1">1 - นั่งงอตัว ก้มหน้าตลอด</option>
+                        <option value="2">2 - นั่งผิดท่าบ่อยครั้ง</option>
+                        <option value="3">3 - ปานกลาง</option>
+                        <option value="4">4 - พยายามนั่งหลังตรง</option>
+                        <option value="5">5 - นั่งหลังตรงตามหลักสรีรศาสตร์</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>🤯 ระดับความเครียด (1-5)</label>
+                    <input type="number" name="stress_level" min="1" max="5" placeholder="1 (น้อย) ถึง 5 (มาก)" required>
+                </div>
+
+                <div class="input-group">
+                    <label>⚡ ระดับความปวดคอ/หลัง (0-10)</label>
+                    <input type="number" name="pain_score_neck_back" min="0" max="10" placeholder="0 (ไม่ปวด) ถึง 10 (ปวดมาก)" required>
+                </div>
+
+                <button type="submit">ดูผลประเมินทันที 🚀</button>
+            </div>
+        </form>
+
+        <!-- แสดงผลลัพธ์ถ้ามีการทำนายแล้ว -->
+        {% if risk_level %}
+        <div class="result-box" style="background-color: {{ bg_color }}; border: 2px dashed {{ color }};">
+            <h2 style="color: {{ color }}; margin: 0 0 15px 0;">ผลประเมินของคุณ: {{ risk_level }}</h2>
+            
+            <!-- กล่องคำแนะนำ -->
+            <div style="background: white; text-align: left; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                <strong style="color: #333; font-size: 16px;">💡 คำแนะนำเพื่อปรับเปลี่ยนพฤติกรรม:</strong>
+                <ul style="color: #555; font-size: 15px; margin-top: 10px; padding-left: 20px; line-height: 1.6;">
+                    {% for item in advice_list %}
+                        <li style="margin-bottom: 8px;">{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if error_text %}
+        <div class="result-box" style="background-color: #FFEBEE; border: 2px dashed #F44336;">
+            <h2 style="color: #F44336; margin: 0;">{{ error_text }}</h2>
+        </div>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>
